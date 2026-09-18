@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sign In | WANDERWISE AI</title>
+
+    <!-- Authentication CSS -->
+    <link rel="stylesheet" href="/static/auth.css">
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="page-bg">
+
+        <div class="gradient-circle circle-1"></div>
+        <div class="gradient-circle circle-2"></div>
+        <div class="gradient-circle circle-3"></div>
+
+    </div>
+
+
+    <!-- Authentication Container -->
+    <main class="auth-container">
+
+        <div class="auth-card">
+
+            <!-- Logo / Brand -->
+            <div class="brand">
+
+                <div class="brand-icon">
+                    ✈️
+                </div>
+
+                <div class="brand-name">
+                    WANDERWISE <span>AI</span>
+                </div>
+
+            </div>
+
+
+            <!-- Heading -->
+            <div class="auth-header">
+
+                <div class="welcome-badge">
+                    🌍 Your journey starts here
+                </div>
+
+                <h1>
+                    Welcome to WANDERWISE AI
+                </h1>
+
+                <p>
+                    Sign in to create personalized travel plans,
+                    discover destinations and manage your trips.
+                </p>
+
+            </div>
+
+
+            <!-- Google Authentication -->
+            <div class="google-section">
+
+                <!-- Google Identity Services configuration -->
+                <div id="g_id_onload"
+                     data-client_id="{{ google_client_id }}"
+                     data-ux_mode="redirect"
+                     data-login_uri="http://localhost:8000/auth/google"
+                     data-auto_prompt="false">
+                </div>
+
+
+                <!-- Google Sign In Button -->
+                <div class="google-button-wrapper">
+
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-size="large"
+                         data-theme="outline"
+                         data-text="continue_with"
+                         data-shape="rectangular"
+                         data-logo_alignment="left">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Divider -->
+            <div class="divider">
+
+                <span>SECURE AUTHENTICATION</span>
+
+            </div>
+
+
+            <!-- Features -->
+            <div class="auth-features">
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        🧠
+                    </div>
+
+                    <div>
+                        <h3>AI Travel Planning</h3>
+                        <p>
+                            Generate personalized itineraries with AI.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        ✈️
+                    </div>
+
+                    <div>
+                        <h3>Travel Intelligence</h3>
+                        <p>
+                            Explore flights, hotels and attractions.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="feature">
+
+                    <div class="feature-icon">
+                        🔐
+                    </div>
+
+                    <div>
+                        <h3>Secure Login</h3>
+                        <p>
+                            Sign in securely using your Google account.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Sign Up Information -->
+            <div class="signup-section">
+
+                <p>
+                    New to WANDERWISE AI?
+                </p>
+
+                <span>
+                    Use <strong>Continue with Google</strong> to create your account.
+                </span>
+
+            </div>
+
+
+            <!-- Back to application -->
+            <a href="/" class="back-link">
+                ← Back to WANDERWISE AI
+            </a>
+
+
+            <!-- Footer -->
+            <div class="auth-footer">
+
+                <span>
+                    Powered by
+                </span>
+
+                <strong>
+                    WANDERWISE AI
+                </strong>
+
+                <span>
+                    • LangGraph • AI
+                </span>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
