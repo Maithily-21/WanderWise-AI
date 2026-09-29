@@ -341,14 +341,17 @@ graph.add_edge("final_agent", END)
 # =========================
 DATABASE_URL = get_database_url()
 
-_conn = psycopg.connect(
-    DATABASE_URL,
-    autocommit=True,
-    row_factory=dict_row
-)
-
-checkpointer = PostgresSaver(_conn)
-checkpointer.setup()
+if "user:password@host" in DATABASE_URL:
+    from langgraph.checkpoint.memory import MemorySaver
+    checkpointer = MemorySaver()
+else:
+    _conn = psycopg.connect(
+        DATABASE_URL,
+        autocommit=True,
+        row_factory=dict_row
+    )
+    checkpointer = PostgresSaver(_conn)
+    checkpointer.setup()
 
 travel_graph = graph.compile(checkpointer=checkpointer)
 
@@ -361,6 +364,8 @@ travel_graph = graph.compile(checkpointer=checkpointer)
 # travel_plan_records — see db/models.py.
 
 def _persist_plan_record(thread_id: str, user_query: str, result: dict):
+    if "user:password@host" in get_database_url():
+        return
     try:
         from db.database import SessionLocal, Base, engine
         from db.models import TravelPlanRecord

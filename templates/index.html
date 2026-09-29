@@ -2,143 +2,106 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>WANDERWISE AI</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563EB',
+                        'primary-hover': '#1D4ED8',
+                        'accent-soft': '#E0F2FE',
+                        'accent-light': '#38BDF8',
+                        'bg-light': '#F8FAFC',
+                        'text-dark': '#0F172A',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-
-<body>
-
-    <div class="page-bg">
-        <div class="gradient-circle circle-1"></div>
-        <div class="gradient-circle circle-2"></div>
-        <div class="gradient-circle circle-3"></div>
-    </div>
-
-    <main class="app-container">
-
-        <section class="hero-section">
-            <div class="badge">
-                ✈️  Plan Your Perfect Trip with AI
-            </div>
-
-            <h1>
-                 WANDERWISE AI — SMART TRIP PLANNER
-            </h1>
-
-            <p>
-                Search flights, discover hotels, and generate a complete travel itinerary using a multi-agent LangGraph system.
-            </p>
-        </section>
-
-        <section class="planner-card">
-
-            <div class="card-header">
-                <div>
-                    <h2>Where do you want to go?</h2>
-                    <p>
-                        Example: Plan a complete 7 days Japan trip from Bangladesh under 2 lakhs.
-                    </p>
-                </div>
-
-                <div class="status-pill">
-                    <span class="status-dot"></span>
-                    Online
-                </div>
-            </div>
-
-            <div class="input-area">
-                <textarea
-                    id="userInput"
-                    placeholder="Plan a complete 7 days Japan trip including flights, hotels and sightseeing under 2 lakhs..."
-                ></textarea>
-
-                <button id="sendBtn" onclick="sendMessage()">
-                    <span id="btnText">Generate Plan</span>
-                    <span id="btnLoader" class="loader hidden"></span>
-                </button>
-            </div>
-
-            <div class="quick-prompts">
-                <button onclick="setPrompt('Plan a complete 7 days Japan trip from Bangladesh including flights, hotels and sightseeing under 2 lakhs.')">
-                    Japan Trip
-                </button>
-
-                <button onclick="setPrompt('Plan a 5 days Dubai trip from Dhaka with flights, hotels and sightseeing.')">
-                    Dubai Trip
-                </button>
-
-                <button onclick="setPrompt('Plan a 7 days Thailand trip from Bangladesh with budget hotels and sightseeing.')">
-                    Thailand Trip
-                </button>
-
-                <button onclick="setPrompt('Give me all country flight info.')">
-                    Global Flights
-                </button>
-            </div>
-
-        </section>
-
-        <section id="resultSection" class="result-section hidden">
-
-            <div class="result-header">
-                <div>
-                    <h2>Your AI Travel Plan</h2>
-                    <p id="threadInfo">Thread ID: -</p>
-                </div>
-
-                <div class="result-actions">
-                    <button class="copy-btn" onclick="copyResult()">
-                        Copy
-                    </button>
-
-                    <button class="download-btn" onclick="downloadPDF()">
-                        Download PDF
-                    </button>
-                </div>
-            </div>
-
-            <div id="pdfContent" class="pdf-content">
-                <h1 class="pdf-title">AI Travel Plan</h1>
-                <div id="resultBox" class="result-box"></div>
-            </div>
-
-        </section>
-
-        <section id="errorBox" class="error-box hidden"></section>
-
-        <!-- NEW: analytics insights panel — price prediction, sentiment,
-             and recommended attractions from the added Analytics Layer. -->
-        <section id="insightsSection" class="result-section hidden">
-
-            <div class="result-header">
-                <div>
-                    <h2>Trip Insights</h2>
-                    <p>Price estimate, review sentiment &amp; top attractions</p>
-                </div>
-            </div>
-
-            <div id="insightsBox" class="result-box insights-grid"></div>
-
-        </section>
-
-    </main>
-
-    <footer>
-        Built with FastAPI, LangGraph, Groq, PostgreSQL, Tavily and AviationStack
-    </footer>
-
-    <!-- Markdown Renderer -->
+    <!-- Chart.js & Markdown & PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-    <!-- PDF Download Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; margin: 0; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Result HTML parsed from Markdown */
+        .markdown-content h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1E3A8A; }
+        .markdown-content h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: #1E40AF; }
+        .markdown-content h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #2563EB; }
+        .markdown-content p { margin-bottom: 1rem; color: #334155; line-height: 1.6; }
+        .markdown-content ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+        .markdown-content li { margin-bottom: 0.25rem; }
+        .markdown-content strong { font-weight: 600; color: #0F172A; }
+        
+        /* Styled Tables for Flights/Trains */
+        .markdown-content table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 1rem; border: 1px solid #E2E8F0; border-radius: 0.75rem; overflow: hidden; }
+        .markdown-content th { background-color: #F8FAFC; color: #475569; font-weight: 600; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #E2E8F0; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .markdown-content td { padding: 0.75rem 1rem; border-bottom: 1px solid #F1F5F9; color: #334155; font-size: 0.95rem; }
+        .markdown-content tr:last-child td { border-bottom: none; }
+        .markdown-content tbody tr:hover { background-color: #F8FAFC; }
+        
+        /* Accordion Transitions */
+        .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; }
+        
+        /* Drawer Overlay */
+        .drawer-overlay { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); }
+        
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex">
+    
+    <script>
+        // Pass server data to React
+        window.USER_DATA = {
+            name: "{{ user.name if user else 'Alex Rivers' }}",
+            picture: "{{ user.picture if user and user.picture else '' }}",
+            firstName: "{{ user.name.split(' ')[0] if user else 'Alex' }}"
+        };
+        if (!window.USER_DATA.picture) {
+            window.USER_DATA.picture = `https://ui-avatars.com/api/?name=${window.USER_DATA.name}&background=2563EB&color=fff`;
+        }
+    </script>
 
-    <!-- Your Custom JS -->
-    <script src="/static/script.js"></script>
+    <div id="root" class="w-full h-full flex"></div>
 
+    <script type="text/babel" src="/static/script.js?v=5"></script>
 </body>
 </html>
