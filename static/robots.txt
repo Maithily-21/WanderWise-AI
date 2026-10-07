@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /privacy
+Allow: /terms
+Disallow: /api/
+Disallow: /auth/
+Sitemap: https://wanderwise.ai/static/sitemap.xml
