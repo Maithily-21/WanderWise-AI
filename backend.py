@@ -262,7 +262,7 @@ Local Attractions:
 Itinerary:
 {state['itinerary']}
 
-Price Prediction (estimated fare from historical patterns — AviationStack doesn't provide ticket prices):
+Price Prediction:
 {price_pred}
 
 Hotel Review Sentiment (from search snippets, model_version={sentiment.get('model_version', 'n/a')}):
@@ -276,12 +276,11 @@ Format the final answer beautifully using these sections:
 4. Weather Outlook
 5. Local Attractions
 6. Day-by-Day Itinerary
-7. Estimated Budget (mention the price prediction if available, and note it's a historical-pattern estimate, not a live quote)
+7. Estimated Budget (mention the price prediction if available)
 8. Final Recommendations
 
 Important:
 - Be clear and practical.
-- Mention that live flight API may not provide ticket prices if pricing is unavailable.
 - If price_prediction's model_version is "stub-v0", don't state a specific number — say a trained estimate isn't available yet.
 - Keep the response useful for real travel planning.
 """

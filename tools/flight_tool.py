@@ -515,11 +515,7 @@ def search_flights(query: str, limit: int = 10):
         elif arr_iata:
             route_text = f" to {arr_iata}"
 
-        return (
-            f"No live flight data found{route_text}.\n\n"
-            "Note: AviationStack provides live/status flight data, not ticket prices. "
-            "For actual fare prices, use a flight-pricing API such as Amadeus."
-        )
+        return f"No live flight data found{route_text}."
 
     route_info = "Global live flights"
 

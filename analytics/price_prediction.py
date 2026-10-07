@@ -65,7 +65,6 @@ class FlightPricePredictor:
         return {
             "estimated_price_usd": round(predicted, 2),
             "assumed_days_ahead": days_ahead,
-            "note": "Estimate from historical fare patterns — AviationStack (used for live flight status) doesn't provide ticket prices.",
             "model_version": self.model_version,
         }
 
