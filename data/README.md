@@ -35,6 +35,11 @@ Train with:
 python scripts/train_sentiment_model.py
 ```
 
+The script also supports the TripAdvisor export
+`tripadvisor_hotel_reviews_dataset_sample.csv`. It derives labels from the
+numeric `rating` column: ratings 1–2 are `negative`, 3 is `neutral`, and
+4–5 are `positive`.
+
 ## If you don't have data yet
 
 Both `analytics/price_prediction.py` and `analytics/sentiment_analysis.py`
