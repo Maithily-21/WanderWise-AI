@@ -52,3 +52,41 @@ prompts. `flight_agent` itself is unchanged and still has this gap.
   truth for conversation/thread state
 - The core LLM prompting style/personality — extended with new data,
   not rewritten
+
+## Price model rework
+
+- `analytics/price_features.py` (new): shared feature engineering, so
+  training and inference build identical frames. Maps dataset city names
+  to IATA codes (the app passes IATA codes; the old model saw only
+  unknown categories at inference). Adds stops, duration, departure hour,
+  fare notes and day-of-month features.
+- `scripts/train_price_model.py`: dedup + grouped split, CV model
+  comparison, per-tier tuning, log target, conformal intervals, baseline
+  re-evaluated on the same test rows, metrics written to
+  `analytics/models/price_model_metrics.json`.
+- `analytics/price_prediction.py`: same `predict()` signature; returns the
+  `predicted_fare_usd` key the frontend reads, labels INR→USD conversion,
+  returns no number for routes outside the training data, validates
+  `days_ahead`, and adds a price range + warnings.
+- `backend.py`: final prompt told not to state a fare when the estimate is null.
+- `tests/test_price_prediction.py` (new): preprocessing, loading,
+  prediction, and `/api/travel` contract tests.
+- v3 features: connecting airports (`connections=` input, new `full` tier;
+  the previous all-details model is now `trip_details`), derived arrival
+  hour / overnight flag, and day-of-year. Test MAE for the all-details model
+  653 -> 561 INR.
+- Live flight details feed the price model: `tools/flight_tool.py` gained
+  `search_flights_with_details()` (same single API call and byte-identical
+  text as `search_flights()`, plus structured airline / departure hour /
+  duration / stops per flight); `backend.py` stores them in a new
+  `flight_details` state key and `analytics_node` calls
+  `price_predictor.predict_for_trip()`, which scores each flight with the
+  detailed model tiers. Arrival hour / overnight flag are now derived inside
+  the saved model pipeline.
+- Prompt fixes found in a live run: fares are labelled `fare_type: "one-way"` with
+  a `route`, and the itinerary/final prompts forbid round-trip figures or
+  presenting an outbound flight as the return. The LLM now gets compact
+  summaries (`summarize_for_prompt`, `summarize_flights_for_prompt`) instead of
+  the raw price dict and flight text: the full versions pushed the final prompt
+  over Groq's free-tier limit (8,000 tokens/request) and returned HTTP 500.
+  The API response and frontend data are unchanged.

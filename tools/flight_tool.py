@@ -4,6 +4,7 @@ import certifi
 import airportsdata
 import pycountry
 import requests
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -466,9 +467,13 @@ Arrival:
 """.strip()
 
 
-def search_flights(query: str, limit: int = 10):
+def _fetch_flights(query: str, limit: int):
+    """
+    One AviationStack request. Returns (dep_iata, arr_iata, flights, error_text);
+    error_text is the exact message search_flights() has always returned.
+    """
     if not API_KEY:
-        return (
+        return None, None, [], (
             "Flight API error: AVIATIONSTACK_API_KEY is missing.\n"
             "Please add this in your .env file:\n"
             "AVIATIONSTACK_API_KEY=your_api_key_here"
@@ -491,20 +496,22 @@ def search_flights(query: str, limit: int = 10):
         response = requests.get(BASE_URL, params=params, timeout=30)
         data = response.json()
     except requests.exceptions.RequestException as e:
-        return f"Flight API request failed: {e}"
+        return dep_iata, arr_iata, [], f"Flight API request failed: {e}"
     except ValueError:
-        return "Flight API returned invalid JSON."
+        return dep_iata, arr_iata, [], "Flight API returned invalid JSON."
 
     if "error" in data:
         error = data["error"]
-        return (
+        return dep_iata, arr_iata, [], (
             "Flight API error:\n"
             f"Code: {error.get('code', 'Unknown')}\n"
             f"Message: {error.get('message', 'Unknown error')}"
         )
 
-    flight_data = data.get("data", [])
+    return dep_iata, arr_iata, data.get("data", []), None
 
+
+def _format_results(dep_iata, arr_iata, flight_data: list, limit: int) -> str:
     if not flight_data:
         route_text = ""
 
@@ -531,7 +538,102 @@ def search_flights(query: str, limit: int = 10):
     return f"{route_info}\n\n" + "\n\n---\n\n".join(formatted_flights)
 
 
-if __name__ == "__main__":
-    print(search_flights("Plan a 7 days Japan trip from Bangladesh"))
-    print("\n" + "=" * 80 + "\n")
-    print(search_flights("all country flight info"))
+def search_flights(query: str, limit: int = 10):
+    dep_iata, arr_iata, flight_data, error = _fetch_flights(query, limit)
+    if error:
+        return error
+    return _format_results(dep_iata, arr_iata, flight_data, limit)
+
+
+def search_flights_with_details(query: str, limit: int = 10):
+    """
+    Same single API call and identical text as search_flights(), plus a list
+    of structured per-flight details (see extract_flight_details) for the
+    price model. Returns (text, details).
+    """
+    dep_iata, arr_iata, flight_data, error = _fetch_flights(query, limit)
+    if error:
+        return error, []
+    details = [extract_flight_details(f) for f in flight_data[:limit]]
+    return _format_results(dep_iata, arr_iata, flight_data, limit), [d for d in details if d]
+
+
+def _local_wall_clock(timestamp: str):
+    """
+    AviationStack 'scheduled' values are the airport's LOCAL time, even though
+    they carry a '+00:00' suffix — so keep the wall-clock time, drop the offset.
+    """
+    try:
+        return datetime.fromisoformat(timestamp).replace(tzinfo=None)
+    except (TypeError, ValueError):
+        return None
+
+
+def extract_flight_details(flight: dict):
+    """
+    Structured details of one AviationStack record, or None if unusable.
+
+    Each record is a single direct leg, so total_stops is 0 and there are no
+    connecting airports. Duration is only computed when both airports share
+    a time zone (local wall-clock times can't be subtracted otherwise);
+    codeshare duplicates are skipped so each operated flight counts once.
+    """
+    if (flight.get("flight") or {}).get("codeshared"):
+        return None
+
+    dep = flight.get("departure") or {}
+    arr = flight.get("arrival") or {}
+    dep_iata, arr_iata = dep.get("iata"), arr.get("iata")
+    if not dep_iata or not arr_iata:
+        return None
+
+    dep_time = _local_wall_clock(dep.get("scheduled"))
+    arr_time = _local_wall_clock(arr.get("scheduled"))
+
+    duration_min = None
+    same_tz = (AIRPORTS.get(dep_iata, {}).get("tz")
+               and AIRPORTS.get(dep_iata, {}).get("tz") == AIRPORTS.get(arr_iata, {}).get("tz"))
+    if dep_time and arr_time and same_tz:
+        minutes = (arr_time - dep_time).total_seconds() / 60
+        if 30 <= minutes <= 48 * 60:
+            duration_min = minutes
+
+    return {
+        "airline": (flight.get("airline") or {}).get("name"),
+        "flight_iata": (flight.get("flight") or {}).get("iata"),
+        "dep_iata": dep_iata,
+        "arr_iata": arr_iata,
+        "dep_scheduled": dep.get("scheduled"),
+        "arr_scheduled": arr.get("scheduled"),
+        "dep_hour": dep_time.hour + dep_time.minute / 60 if dep_time else None,
+        "duration_min": duration_min,
+        "total_stops": 0,
+        "connections": [],
+        "status": flight.get("flight_status"),
+        "dep_terminal": dep.get("terminal"),
+        "arr_terminal": arr.get("terminal"),
+    }
+
+
+def summarize_flights_for_prompt(flight_text: str, details: list) -> str:
+    """
+    Compact flight list for LLM prompts: one line per operated flight
+    (codeshare duplicates already dropped). The full flight_text (~130 tokens
+    per flight) pushed prompts past the LLM's per-request token limit. Falls
+    back to flight_text when there are no parsed details (errors, no data).
+    """
+    if not details:
+        return flight_text
+
+    def hhmm(ts):
+        return (ts or "")[11:16] or "?"
+
+    header = flight_text.split("\n", 1)[0]
+    lines = [
+        f"- {d.get('airline') or 'Unknown airline'} {d.get('flight_iata') or ''} | "
+        f"{d['dep_iata']} T{d.get('dep_terminal') or '?'} {hhmm(d.get('dep_scheduled'))} -> "
+        f"{d['arr_iata']} T{d.get('arr_terminal') or '?'} {hhmm(d.get('arr_scheduled'))} | "
+        f"{d.get('status') or 'unknown'}"
+        for d in details
+    ]
+    return header + " (scheduled local times):\n" + "\n".join(lines)

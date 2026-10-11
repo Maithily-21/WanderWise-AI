@@ -63,7 +63,8 @@ all coordinated through a LangGraph workflow that now fans out to all four data-
 │   ├── local_info_tool.py       [added] OpenTripMap client
 │   └── location_resolver.py     [added] shared destination resolution
 ├── analytics/                   [added] Analytics Layer
-│   ├── price_prediction.py      trainable XGBoost regressor, stub fallback
+│   ├── price_prediction.py      trainable XGBoost fare model (per input tier), stub fallback
+│   ├── price_features.py        shared train/inference feature engineering
 │   ├── sentiment_analysis.py    trainable TF-IDF+LogReg, stub fallback
 │   ├── recommendation_engine.py ranks attractions by rating
 │   └── models/                  trained .pkl files land here (gitignored)
@@ -155,7 +156,12 @@ expected. Once you've added your datasets:
 ```bash
 python scripts/train_price_model.py
 python scripts/train_sentiment_model.py
+python -m unittest discover -s tests -v   # price model + API contract tests
 ```
+
+The price trainer also re-evaluates the original baseline on the same
+held-out split and writes `analytics/models/price_model_metrics.json`;
+see `analytics/models/README.md` for the protocol and results.
 
 Each writes a `.pkl` to `analytics/models/`. The moment that file
 exists, `analytics/price_prediction.py` / `sentiment_analysis.py`
@@ -187,6 +193,13 @@ flight agent found. See `analytics/price_prediction.py` for details.
   carry a structured date, so price prediction assumes a fixed
   "30 days ahead" horizon. Wire in real date parsing if you need
   date-specific estimates.
+- **Price model coverage**: the bundled fare data covers only 5 Indian
+  domestic routes (2019, INR). Other routes get no fare number and an
+  explanatory note; USD is converted at `INR_PER_USD` (default 70.4).
+  On covered routes the fare estimate uses live flight details (airline,
+  departure time, duration, stops) from the AviationStack response, so it
+  depends on `AVIATIONSTACK_API_KEY`; without them it falls back to a
+  route + date estimate. The travel date is still assumed (30 days ahead).
 
 ## Contributing / Acknowledgments
 

@@ -5,22 +5,33 @@ named exactly as below, then run the matching training script from
 the repo root. Nothing else in the codebase needs to change.
 
 ## `flight_fares.csv`
-Required columns:
+The repo ships the Kaggle Indian domestic flight-fare dataset here
+(columns `airline, Date_of_Journey, origin, destination, Route, Dep_Time,
+Arrival_Time, Duration, Total_Stops, Additional_Info, price`). Prices are
+**INR**, journeys are Mar–Jun 2019, and cities are names that the trainer
+maps to IATA codes (`Banglore`→`BLR`, `Delhi`/`New Delhi`→`DEL`, …). It
+covers 5 routes: BLR→DEL, BOM→HYD, CCU→BLR, DEL→COK, MAA→CCU.
+
+Alternatively, a minimal normalized schema is accepted:
 
 | column | type | notes |
 |---|---|---|
 | `origin` | string | IATA code, e.g. `DAC` |
 | `destination` | string | IATA code, e.g. `NRT` |
-| `days_before_departure` | int | how far ahead of travel the fare was recorded |
-| `airline` | string | airline/carrier code |
+| `airline` | string | airline name |
 | `month` | int | 1–12, travel month |
 | `day_of_week` | int | 0–6, travel day of week (0 = Monday) |
 | `price` | float | the fare — training target |
+
+Optional: `day_of_month`, `total_stops`, `duration_min`, `dep_hour`,
+`additional_info`. (`days_before_departure` is ignored: the Kaggle data has
+no booking date, so the old constant value carried no information.)
 
 Train with:
 ```bash
 python scripts/train_price_model.py
 ```
+See `analytics/models/README.md` for the evaluation protocol and results.
 
 ## `travel_reviews.csv`
 Required columns:

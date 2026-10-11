@@ -5,59 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - WanderWise AI</title>
     <meta name="description" content="Sign in to WanderWise AI to describe trips in plain language and generate coordinated travel itineraries.">
-    
+
     <link rel="canonical" href="https://wanderwise.ai/login">
     <meta property="og:title" content="Sign In - WanderWise AI">
     <meta property="og:description" content="Sign in to WanderWise AI to describe trips in plain language and generate coordinated travel itineraries.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://wanderwise.ai/login">
-    
+
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Sign In - WanderWise AI">
     <meta name="twitter:description" content="Sign in to WanderWise AI to describe trips in plain language and generate coordinated travel itineraries.">
-    
+
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="/static/style.css">
 
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body>
-    <header class="app-header">
-        <div class="header-container">
-            <a href="/login" class="brand-link" id="brand-home-link">
-                <div class="brand-monogram">W</div>
-                <span class="brand-name">WanderWise AI</span>
-            </a>
-            <nav class="header-nav">
-                <a href="#how-it-works" class="nav-link" id="nav-how-link">How It Works</a>
-                <a href="#sample-plan" class="nav-link" id="nav-sample-link">Sample Output</a>
-                <a href="#signin-card" class="btn-primary" style="padding: 6px 14px; font-size: 0.85rem;" id="nav-signin-btn">
-                    Sign In
-                </a>
-            </nav>
-        </div>
-    </header>
+<body class="auth-body">
+    <main class="auth-shell" id="main-landing-view">
+        <a href="/login" class="auth-brand" id="brand-home-link">
+            <span class="brand-mark" aria-hidden="true">W</span>
+            WANDERWISE AI
+        </a>
 
-    <main class="main-layout" id="main-landing-view">
-        <!-- Hero Section -->
-        <section class="landing-hero" aria-labelledby="hero-headline">
-            <h1 id="hero-headline" class="landing-headline">
-                Describe a trip. Get flights, hotels, weather and a day-by-day plan.
-            </h1>
-            <p class="landing-subhead">
-                Enter your destination, dates, budget or travel style in plain language. Coordinated multi-agent workflows collect flight statuses, hotel search results, weather forecasts, and attraction ratings to construct an organized itinerary.
-            </p>
-        </section>
+        <section id="signin-card" class="auth-card" aria-labelledby="signin-heading">
+            <h1 id="signin-heading" class="auth-title">Welcome back!</h1>
+            <p class="auth-subtitle" id="signin-subtitle">Your AI travel companion is ready for the next trip.</p>
 
-        <!-- Sign-In Card -->
-        <section id="signin-card" class="auth-card-center" aria-labelledby="signin-heading">
-            <h2 id="signin-heading" class="auth-card-title">Sign In to WanderWise AI</h2>
-            <p class="auth-card-text">
-                Authenticate with your verified Google account to start planning trips.
-            </p>
+            <div class="auth-tabs" role="tablist" aria-label="Account">
+                <button type="button" class="auth-tab" role="tab" id="tab-login" aria-selected="true" onclick="setAuthMode('login')">Log In</button>
+                <button type="button" class="auth-tab" role="tab" id="tab-signup" aria-selected="false" onclick="setAuthMode('signup')">Sign Up</button>
+            </div>
+
+            <p class="auth-note" id="auth-note">Sign in securely with your verified Google account.</p>
 
             {% if google_client_id %}
                 <div class="google-signin-wrapper">
@@ -71,162 +57,57 @@
                          data-type="standard"
                          data-size="large"
                          data-theme="outline"
-                         data-text="sign_in_with"
-                         data-shape="rectangular"
+                         data-text="continue_with"
+                         data-shape="pill"
+                         data-width="320"
                          data-logo_alignment="left">
                     </div>
                 </div>
             {% else %}
-                <div class="inline-notification error" style="text-align:left; margin-bottom: 12px;">
-                    <div>
-                        <strong>Google Sign-In is not configured.</strong><br>
-                        Add <code>GOOGLE_CLIENT_ID</code> to your <code>.env</code> file to enable sign-in.
-                        <ol style="margin: 8px 0 0 16px; font-size: 0.8rem; line-height: 1.7;">
-                            <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console &gt; Credentials</a>.</li>
-                            <li>Create an OAuth 2.0 Client ID (Web application type).</li>
-                            <li>Add <code>http://127.0.0.1:8000</code> as an Authorized JavaScript Origin.</li>
-                            <li>Add <code>http://127.0.0.1:8000/auth/google</code> as an Authorized Redirect URI.</li>
-                            <li>Copy the Client ID and paste it into your <code>.env</code>:<br>
-                                <code>GOOGLE_CLIENT_ID=your_client_id_here</code>
-                            </li>
-                            <li>Restart the server.</li>
-                        </ol>
-                    </div>
+                <div class="config-notice" role="alert">
+                    <strong>Google Sign-In is not configured.</strong>
+                    Add <code>GOOGLE_CLIENT_ID</code> to your <code>.env</code> file to enable it.
+                    <ol>
+                        <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console &gt; Credentials</a>.</li>
+                        <li>Create an OAuth 2.0 Client ID (Web application type).</li>
+                        <li>Add <code>http://127.0.0.1:8000</code> as an Authorized JavaScript Origin.</li>
+                        <li>Add <code>http://127.0.0.1:8000/auth/google</code> as an Authorized Redirect URI.</li>
+                        <li>Set <code>GOOGLE_CLIENT_ID=your_client_id_here</code> and restart the server.</li>
+                    </ol>
                 </div>
+                <a href="/auth/mock" class="btn btn-primary btn-block">Continue with demo account</a>
             {% endif %}
 
-            <div style="margin-top: 16px; font-size: 0.775rem; color: var(--color-text-faint);">
-                By signing in, you agree to our
+            <div class="auth-divider">what you get</div>
+            <div class="auth-features">
+                <span class="pill pill-soft">Live flights</span>
+                <span class="pill pill-soft">Hotels</span>
+                <span class="pill pill-soft">Weather</span>
+                <span class="pill pill-soft">Day-by-day plan</span>
+            </div>
+
+            <p class="auth-switch" id="auth-switch-login">
+                New to WanderWise? <button type="button" class="link-btn" onclick="setAuthMode('signup')">Sign up</button>
+            </p>
+            <p class="auth-switch" id="auth-switch-signup" hidden>
+                Already have an account? <button type="button" class="link-btn" onclick="setAuthMode('login')">Log in</button>
+            </p>
+
+            <p class="auth-legal">
+                By continuing, you agree to our
                 <a href="#terms" onclick="showLegalView('terms');">Terms and Conditions</a>
                 and
                 <a href="#privacy" onclick="showLegalView('privacy');">Privacy Policy</a>.
-            </div>
-        </section>
-
-
-        <!-- Feature Capabilities -->
-        <section id="how-it-works" style="margin-bottom: 40px;" aria-labelledby="capabilities-heading">
-            <h2 id="capabilities-heading" style="font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; text-align: center;">
-                Multi-Agent System Architecture
-            </h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3 class="feature-card-title">Flight Status Research</h3>
-                    <p class="feature-card-desc">
-                        AviationStack queries live airline and flight records for designated routes. Note: displays status information, not live ticket prices.
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <h3 class="feature-card-title">Hotel and Neighborhood Search</h3>
-                    <p class="feature-card-desc">
-                        Tavily web search queries current accommodation recommendations and traveler sentiment for the selected destination.
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <h3 class="feature-card-title">Weather Forecast Integration</h3>
-                    <p class="feature-card-desc">
-                        OpenWeatherMap retrieves expected daily temperature ranges and conditions to ensure activity suggestions match the forecast.
-                    </p>
-                </div>
-                <div class="feature-card">
-                    <h3 class="feature-card-title">Local Attractions and Landmarks</h3>
-                    <p class="feature-card-desc">
-                        OpenTripMap searches point-of-interest ratings and geographic coordinates for key sights and cultural venues.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Clearly Labeled Sample Output -->
-        <section id="sample-plan" class="sample-output-box" aria-labelledby="sample-plan-title">
-            <div class="sample-tag">Example Output</div>
-            <h2 id="sample-plan-title" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">
-                Sample Request: "3-day cultural trip to Tokyo with moderate walking and local dining"
-            </h2>
-            <p style="font-size: 0.875rem; color: var(--color-text-muted); margin-bottom: 16px;">
-                Below is a representative sample of coordinated results returned by the LangGraph travel planning pipeline.
             </p>
-
-            <div class="results-grid">
-                <div class="results-primary-col">
-                    <div class="result-card" style="margin-bottom: 0;">
-                        <h3 class="card-title">Itinerary Preview</h3>
-                        <div class="markdown-body">
-                            <h4>Day 1: Historic Asakusa and Ueno Park</h4>
-                            <p>Morning visit to Senso-ji Temple and the Nakamise shopping street. Afternoon walk through Ueno Park with stops at the Tokyo National Museum. Dinner in Ameyoko market.</p>
-                            <h4>Day 2: Modern Art, Shibuya and Harajuku</h4>
-                            <p>Morning stroll through Meiji Jingu shrine. Midday exploration of Harajuku and Omotesando architecture. Evening crossing at Shibuya and dinner nearby.</p>
-                            <h4>Day 3: Waterfront Odaiba and Ginza Dining</h4>
-                            <p>Morning ferry ride along the Sumida river toward Odaiba. Afternoon walk through Ginza shopping district. Farewell dinner at a local izakaya.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="results-sidebar-col">
-                    <div class="result-card" style="margin-bottom: 16px;">
-                        <h3 class="card-title">Weather Forecast (OpenWeatherMap)</h3>
-                        <div class="data-table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Forecast</th>
-                                        <th>Min</th>
-                                        <th>Max</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>2026-10-08</td>
-                                        <td>Clear</td>
-                                        <td>15°C</td>
-                                        <td>23°C</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2026-10-09</td>
-                                        <td>Scattered Clouds</td>
-                                        <td>16°C</td>
-                                        <td>22°C</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2026-10-10</td>
-                                        <td>Light Rain</td>
-                                        <td>14°C</td>
-                                        <td>19°C</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="result-card">
-                        <h3 class="card-title">Attractions (OpenTripMap)</h3>
-                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
-                            <li style="display: flex; justify-content: space-between; font-size: 0.85rem; border-bottom: 1px solid var(--color-border); padding-bottom: 4px;">
-                                <span>Senso-ji Temple</span>
-                                <span style="color: var(--color-text-faint);">Rating: 3</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between; font-size: 0.85rem; border-bottom: 1px solid var(--color-border); padding-bottom: 4px;">
-                                <span>Meiji Jingu</span>
-                                <span style="color: var(--color-text-faint);">Rating: 3</span>
-                            </li>
-                            <li style="display: flex; justify-content: space-between; font-size: 0.85rem; border-bottom: 1px solid var(--color-border); padding-bottom: 4px;">
-                                <span>Tokyo National Museum</span>
-                                <span style="color: var(--color-text-faint);">Rating: 2</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
     <!-- Privacy Policy View (Toggled via Hash / Nav) -->
-    <main class="main-layout" id="legal-privacy-view" style="display: none;">
+    <main class="auth-legal-view" id="legal-privacy-view" style="display: none;">
         <!-- Draft, needs legal review before launch -->
         <div class="legal-page">
-            <button onclick="showMainLandingFromBack();" class="btn-secondary" style="margin-bottom: 20px;">
-                Back to Sign In
+            <button onclick="showMainLandingFromBack();" class="btn btn-ghost legal-back">
+                &larr; Back to Sign In
             </button>
             <h1>Privacy Policy</h1>
             <p class="legal-meta">Effective Date: October 2026. Draft, needs legal review before launch.</p>
@@ -263,7 +144,7 @@
             <section class="legal-section">
                 <h2>4. Data Storage and Retention</h2>
                 <p>
-                    Travel plans and conversation checkpoints are stored in a PostgreSQL database. We do not sell user data, run advertisements, or track user activity across other websites.
+                    Travel plans and conversation checkpoints are stored in a PostgreSQL database. Trips you save with the Save button are kept only in your browser's local storage. We do not sell user data, run advertisements, or track user activity across other websites.
                 </p>
             </section>
 
@@ -277,11 +158,11 @@
     </main>
 
     <!-- Terms and Conditions View (Toggled via Hash / Nav) -->
-    <main class="main-layout" id="legal-terms-view" style="display: none;">
+    <main class="auth-legal-view" id="legal-terms-view" style="display: none;">
         <!-- Draft, needs legal review before launch -->
         <div class="legal-page">
-            <button onclick="showMainLandingFromBack();" class="btn-secondary" style="margin-bottom: 20px;">
-                Back to Sign In
+            <button onclick="showMainLandingFromBack();" class="btn btn-ghost legal-back">
+                &larr; Back to Sign In
             </button>
             <h1>Terms and Conditions</h1>
             <p class="legal-meta">Effective Date: October 2026. Draft, needs legal review before launch.</p>
@@ -323,25 +204,33 @@
         </div>
     </main>
 
-    <footer class="app-footer">
-        <div class="footer-container">
-            <div class="footer-disclaimer">
-                WanderWise AI. Travel plans are AI-generated and must be verified before booking.
-            </div>
-            <div class="footer-links">
-                <a href="#privacy" onclick="showLegalView('privacy');">Privacy Policy</a>
-                <a href="#terms" onclick="showLegalView('terms');">Terms and Conditions</a>
-            </div>
-        </div>
+    <footer class="auth-footer">
+        <span>WanderWise AI. Travel plans are AI-generated and must be verified before booking.</span>
     </footer>
 
     <script>
-        function showMainLanding() {
-            window.location.hash = '';
-            document.getElementById('main-landing-view').style.display = 'block';
-            document.getElementById('legal-privacy-view').style.display = 'none';
-            document.getElementById('legal-terms-view').style.display = 'none';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        const AUTH_COPY = {
+            login: {
+                heading: 'Welcome back!',
+                subtitle: 'Your AI travel companion is ready for the next trip.',
+                note: 'Sign in securely with your verified Google account.'
+            },
+            signup: {
+                heading: 'Create your account',
+                subtitle: 'Plan smarter trips with flights, hotels and weather in one place.',
+                note: 'Your account is created automatically the first time you continue with Google.'
+            }
+        };
+
+        function setAuthMode(mode) {
+            const copy = AUTH_COPY[mode];
+            document.getElementById('tab-login').setAttribute('aria-selected', String(mode === 'login'));
+            document.getElementById('tab-signup').setAttribute('aria-selected', String(mode === 'signup'));
+            document.getElementById('signin-heading').textContent = copy.heading;
+            document.getElementById('signin-subtitle').textContent = copy.subtitle;
+            document.getElementById('auth-note').textContent = copy.note;
+            document.getElementById('auth-switch-login').hidden = mode !== 'login';
+            document.getElementById('auth-switch-signup').hidden = mode !== 'signup';
         }
 
         function showLegalView(page) {
@@ -364,17 +253,20 @@
                 showLegalView('privacy');
             } else if (hash === '#terms') {
                 showLegalView('terms');
+            } else {
+                showMainLanding();
             }
-            // All other hashes (#how-it-works, #sample-plan, #signin-card, etc.)
-            // are left alone so the browser handles native anchor scrolling.
+        }
+
+        function showMainLanding() {
+            document.getElementById('legal-privacy-view').style.display = 'none';
+            document.getElementById('legal-terms-view').style.display = 'none';
+            document.getElementById('main-landing-view').style.display = 'flex';
         }
 
         function showMainLandingFromBack() {
             // Only called by "Back" buttons in legal views.
-            // Ensures the main landing view is visible and clears the hash.
-            document.getElementById('legal-privacy-view').style.display = 'none';
-            document.getElementById('legal-terms-view').style.display = 'none';
-            document.getElementById('main-landing-view').style.display = 'block';
+            showMainLanding();
             history.pushState(null, '', window.location.pathname);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }

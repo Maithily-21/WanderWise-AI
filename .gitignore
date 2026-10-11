@@ -221,3 +221,6 @@ __marimo__/
 analytics/models/*.pkl
 
 .env
+
+# Node / frontend dependencies
+node_modules/

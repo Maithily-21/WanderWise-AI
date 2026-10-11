@@ -24,11 +24,11 @@ from langchain_core.messages import (
 )
 from langchain_groq import ChatGroq
 from tools.tavily_tool import tavily_search
-from tools.flight_tool import search_flights
+from tools.flight_tool import search_flights_with_details, summarize_flights_for_prompt
 from tools.weather_tool import get_weather_forecast
 from tools.local_info_tool import get_local_attractions, get_attractions_structured
 from tools.location_resolver import resolve_trip_locations
-from analytics.price_prediction import price_predictor
+from analytics.price_prediction import price_predictor, summarize_for_prompt
 from analytics.sentiment_analysis import sentiment_analyzer
 from analytics.recommendation_engine import rank_attractions
 
@@ -82,6 +82,7 @@ class TravelState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     user_query: str
     flight_results: str
+    flight_details: Optional[list]
     hotel_results: str
     weather_results: str
     local_info_results: str
@@ -98,10 +99,13 @@ class TravelState(TypedDict):
 
 def flight_agent(state: TravelState):
     query = state["user_query"]
-    flight_data = search_flights(query)
+    # One API call: the same text as before (the frontend parses it) plus
+    # structured per-flight details for the price model.
+    flight_data, flight_details = search_flights_with_details(query)
 
     return {
         "flight_results": flight_data,
+        "flight_details": flight_details,
         "messages": [
             AIMessage(content="Flight results fetched.")
         ],
@@ -167,6 +171,12 @@ def local_info_agent(state: TravelState):
     }
 
 
+def _flights_for_prompt(state: TravelState) -> str:
+    # Compact list for the LLM; state["flight_results"] (sent to the
+    # frontend) keeps the full original text.
+    return summarize_flights_for_prompt(state["flight_results"], state.get("flight_details") or [])
+
+
 # =========================
 # Itinerary Agent
 # =========================
@@ -181,7 +191,7 @@ User Query:
 {state['user_query']}
 
 Flight Results:
-{state['flight_results']}
+{_flights_for_prompt(state)}
 
 Hotel Results:
 {state['hotel_results']}
@@ -195,6 +205,11 @@ Local Attractions:
 Make the itinerary practical, budget-aware, weather-appropriate, and
 easy to follow. Reference specific attractions from the list above
 where relevant to each day.
+
+The flight results cover only the outbound direction (origin to
+destination). Never present one of them as a return flight and never name
+a flight number, time or fare for the return; if the trip needs a return,
+just say return flights still need to be checked separately.
 """
 
     response = llm.invoke([
@@ -219,9 +234,12 @@ where relevant to each day.
 def analytics_node(state: TravelState):
     locations = resolve_trip_locations(state["user_query"])
 
-    price_result = price_predictor.predict(
+    # Live flight details (airline, stops, duration, departure time) from the
+    # flight agent let the price model use its detailed tiers per flight.
+    price_result = price_predictor.predict_for_trip(
         origin_iata=locations["origin_iata"],
         destination_iata=locations["destination_iata"],
+        flight_details=state.get("flight_details"),
     )
     sentiment_result = sentiment_analyzer.score_hotel_results(state["hotel_results"])
 
@@ -248,7 +266,7 @@ User Request:
 {state['user_query']}
 
 Flights:
-{state['flight_results']}
+{_flights_for_prompt(state)}
 
 Hotels:
 {state['hotel_results']}
@@ -263,7 +281,7 @@ Itinerary:
 {state['itinerary']}
 
 Price Prediction:
-{price_pred}
+{summarize_for_prompt(price_pred)}
 
 Hotel Review Sentiment (from search snippets, model_version={sentiment.get('model_version', 'n/a')}):
 {sentiment}
@@ -281,7 +299,10 @@ Format the final answer beautifully using these sections:
 
 Important:
 - Be clear and practical.
-- If price_prediction's model_version is "stub-v0", don't state a specific number — say a trained estimate isn't available yet.
+- If the Price Prediction says "No fare estimate" (e.g. model_version "stub-v0"), don't state a specific fare — briefly relay why.
+- Otherwise present the fare with its range and warnings as a historical estimate, not a live price; you may briefly list the per-flight estimates.
+- The fare is ONE-WAY for the stated route only. Never label it round-trip, double it, or show any return or round-trip fare figure (not even "if similar"); budget only the outbound fare and say the return fare isn't estimated.
+- Flight results cover only the outbound direction. Never name a flight number, time or fare for the return, even if the itinerary suggests one; say return flights need to be checked separately.
 - Keep the response useful for real travel planning.
 """
 
@@ -416,6 +437,7 @@ def run_travel_agent(user_input: str, thread_id: str | None = None):
             ],
             "user_query": user_input,
             "flight_results": "",
+            "flight_details": None,
             "hotel_results": "",
             "weather_results": "",
             "local_info_results": "",

@@ -1,0 +1,329 @@
+{
+  "trained_at": "2026-10-11T06:47:24+00:00",
+  "dataset": {
+    "path": "data/flight_fares.csv",
+    "rows_raw": 10683,
+    "rows_after_dedup": 10463,
+    "currency": "INR",
+    "journey_dates": [
+      "2019-03-01",
+      "2019-06-27"
+    ],
+    "routes": [
+      "BLR-DEL",
+      "BOM-HYD",
+      "CCU-BLR",
+      "DEL-COK",
+      "MAA-CCU"
+    ]
+  },
+  "split": {
+    "method": "GroupShuffleSplit 80/20 on identical-input groups",
+    "seed": 42,
+    "train_rows": 8370,
+    "test_rows": 2093
+  },
+  "baseline": {
+    "description": "Previous recipe: XGBoost on raw target, one-hot city names + airline, constant days_before_departure=30, month, day_of_week",
+    "test": {
+      "full": {
+        "mae": 1813.2,
+        "rmse": 2697.9,
+        "r2": 0.637,
+        "mape_pct": 21.16
+      },
+      "route_date": {
+        "mae": 3107.3,
+        "rmse": 4185.1,
+        "r2": 0.1265,
+        "mape_pct": 32.72
+      },
+      "as_called_by_app": {
+        "mae": 3747.5,
+        "rmse": 4995.6,
+        "r2": -0.2445,
+        "mape_pct": 40.59
+      }
+    }
+  },
+  "cv_comparison": [
+    {
+      "tier": "full",
+      "model": "ridge_log",
+      "mae": 1503.4,
+      "rmse": 2398.8,
+      "r2": 0.735,
+      "mape_pct": 17.17,
+      "cv_seconds": 0.9
+    },
+    {
+      "tier": "full",
+      "model": "random_forest_log",
+      "mae": 625.1,
+      "rmse": 1637.2,
+      "r2": 0.8766,
+      "mape_pct": 6.63,
+      "cv_seconds": 40.0
+    },
+    {
+      "tier": "full",
+      "model": "hist_gb_log",
+      "mae": 807.6,
+      "rmse": 1761.1,
+      "r2": 0.8572,
+      "mape_pct": 8.68,
+      "cv_seconds": 4.8
+    },
+    {
+      "tier": "full",
+      "model": "xgboost_log",
+      "mae": 687.9,
+      "rmse": 1446.3,
+      "r2": 0.9037,
+      "mape_pct": 7.42,
+      "cv_seconds": 6.2
+    },
+    {
+      "tier": "trip_details",
+      "model": "ridge_log",
+      "mae": 1750.0,
+      "rmse": 2740.9,
+      "r2": 0.6541,
+      "mape_pct": 19.34,
+      "cv_seconds": 0.6
+    },
+    {
+      "tier": "trip_details",
+      "model": "random_forest_log",
+      "mae": 696.7,
+      "rmse": 1735.5,
+      "r2": 0.8613,
+      "mape_pct": 7.37,
+      "cv_seconds": 10.3
+    },
+    {
+      "tier": "trip_details",
+      "model": "hist_gb_log",
+      "mae": 890.2,
+      "rmse": 1874.9,
+      "r2": 0.8381,
+      "mape_pct": 9.5,
+      "cv_seconds": 4.4
+    },
+    {
+      "tier": "trip_details",
+      "model": "xgboost_log",
+      "mae": 696.6,
+      "rmse": 1458.8,
+      "r2": 0.902,
+      "mape_pct": 7.47,
+      "cv_seconds": 6.4
+    },
+    {
+      "tier": "route_date_airline",
+      "model": "ridge_log",
+      "mae": 2165.5,
+      "rmse": 3288.8,
+      "r2": 0.502,
+      "mape_pct": 24.72,
+      "cv_seconds": 0.5
+    },
+    {
+      "tier": "route_date_airline",
+      "model": "random_forest_log",
+      "mae": 1547.7,
+      "rmse": 2434.7,
+      "r2": 0.727,
+      "mape_pct": 17.07,
+      "cv_seconds": 7.0
+    },
+    {
+      "tier": "route_date_airline",
+      "model": "hist_gb_log",
+      "mae": 1560.3,
+      "rmse": 2502.6,
+      "r2": 0.7116,
+      "mape_pct": 17.16,
+      "cv_seconds": 8.9
+    },
+    {
+      "tier": "route_date_airline",
+      "model": "xgboost_log",
+      "mae": 1528.1,
+      "rmse": 2313.8,
+      "r2": 0.7535,
+      "mape_pct": 16.99,
+      "cv_seconds": 8.3
+    },
+    {
+      "tier": "route_date",
+      "model": "ridge_log",
+      "mae": 3085.9,
+      "rmse": 4279.6,
+      "r2": 0.1566,
+      "mape_pct": 37.47,
+      "cv_seconds": 0.6
+    },
+    {
+      "tier": "route_date",
+      "model": "random_forest_log",
+      "mae": 2250.4,
+      "rmse": 3251.0,
+      "r2": 0.5133,
+      "mape_pct": 26.64,
+      "cv_seconds": 6.8
+    },
+    {
+      "tier": "route_date",
+      "model": "hist_gb_log",
+      "mae": 2252.2,
+      "rmse": 3250.6,
+      "r2": 0.5134,
+      "mape_pct": 26.64,
+      "cv_seconds": 4.9
+    },
+    {
+      "tier": "route_date",
+      "model": "xgboost_log",
+      "mae": 2249.9,
+      "rmse": 3250.2,
+      "r2": 0.5136,
+      "mape_pct": 26.64,
+      "cv_seconds": 6.1
+    }
+  ],
+  "tuning": {
+    "search": "RandomizedSearchCV",
+    "n_iter": 25,
+    "cv": "GroupKFold(5)",
+    "scoring": "neg_mean_absolute_error",
+    "tiers": {
+      "full": {
+        "params": {
+          "subsample": 1.0,
+          "reg_lambda": 1.0,
+          "n_estimators": 600,
+          "min_child_weight": 2,
+          "max_depth": 10,
+          "learning_rate": 0.06,
+          "colsample_bytree": 1.0
+        },
+        "cv_mae": 589.0
+      },
+      "trip_details": {
+        "params": {
+          "subsample": 1.0,
+          "reg_lambda": 1.0,
+          "n_estimators": 600,
+          "min_child_weight": 2,
+          "max_depth": 10,
+          "learning_rate": 0.06,
+          "colsample_bytree": 1.0
+        },
+        "cv_mae": 634.0
+      },
+      "route_date_airline": {
+        "params": {
+          "subsample": 0.9,
+          "reg_lambda": 5.0,
+          "n_estimators": 200,
+          "min_child_weight": 2,
+          "max_depth": 10,
+          "learning_rate": 0.06,
+          "colsample_bytree": 0.5
+        },
+        "cv_mae": 1524.7
+      },
+      "route_date": {
+        "params": {
+          "subsample": 0.9,
+          "reg_lambda": 5.0,
+          "n_estimators": 600,
+          "min_child_weight": 2,
+          "max_depth": 5,
+          "learning_rate": 0.15,
+          "colsample_bytree": 1.0
+        },
+        "cv_mae": 2248.9
+      }
+    }
+  },
+  "final_test": {
+    "full": {
+      "mae": 560.5,
+      "rmse": 1184.5,
+      "r2": 0.93,
+      "mape_pct": 6.02,
+      "interval_coverage": 0.812,
+      "predict_ms_per_row_batch": 0.0377
+    },
+    "trip_details": {
+      "mae": 587.8,
+      "rmse": 1356.6,
+      "r2": 0.9082,
+      "mape_pct": 6.16,
+      "interval_coverage": 0.826,
+      "predict_ms_per_row_batch": 0.023
+    },
+    "route_date_airline": {
+      "mae": 1608.3,
+      "rmse": 2381.1,
+      "r2": 0.7173,
+      "mape_pct": 17.5,
+      "interval_coverage": 0.776,
+      "predict_ms_per_row_batch": 0.0176
+    },
+    "route_date": {
+      "mae": 2262.4,
+      "rmse": 3118.6,
+      "r2": 0.515,
+      "mape_pct": 26.32,
+      "interval_coverage": 0.796,
+      "predict_ms_per_row_batch": 0.0158
+    }
+  },
+  "intervals": {
+    "level": 0.8,
+    "method": "split-conformal on |log residual| (out-of-fold, train split)",
+    "log_half_width": {
+      "full": 0.0956933240254358,
+      "trip_details": 0.10211244576415134,
+      "route_date_airline": 0.26543794068432586,
+      "route_date": 0.4065934306894377
+    }
+  },
+  "temporal_check": {
+    "train": "journeys before 2019-06-01",
+    "test": "June 2019 journeys",
+    "baseline_full": {
+      "mae": 1703.3,
+      "rmse": 2243.7,
+      "r2": 0.6432,
+      "mape_pct": 20.35
+    },
+    "final_full": {
+      "mae": 1050.0,
+      "rmse": 1449.5,
+      "r2": 0.8511,
+      "mape_pct": 11.67
+    },
+    "final_trip_details": {
+      "mae": 1062.5,
+      "rmse": 1464.6,
+      "r2": 0.848,
+      "mape_pct": 11.9
+    },
+    "final_route_date_airline": {
+      "mae": 1754.5,
+      "rmse": 2354.3,
+      "r2": 0.6072,
+      "mape_pct": 19.58
+    },
+    "final_route_date": {
+      "mae": 2431.1,
+      "rmse": 3032.5,
+      "r2": 0.3483,
+      "mape_pct": 31.53
+    }
+  }
+}
